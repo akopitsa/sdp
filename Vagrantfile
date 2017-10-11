@@ -49,6 +49,9 @@ Vagrant.configure("2") do |config|
       systemctl enable ntpd
       rpm -ivh https://yum.puppetlabs.com/puppetlabs-release-pc1-el-7.noarch.rpm
       yum -y install puppet-agent
+      yum -y install httpd
+      systemctl enable httpd.service
+      systemctl restart httpd.service
       echo "#{$ipaddresspuppetserver} #{$hostnamepuppetserver}" >> /etc/hosts
       if  grep -Fxq "[main]" /etc/puppetlabs/puppet/puppet.conf
       then
