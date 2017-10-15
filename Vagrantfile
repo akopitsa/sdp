@@ -1,12 +1,14 @@
-$hostnamepuppetserver = "xpuakhaw0014t1"
+$hostnamepuppetserver = "puppettestserver.loc"
 $ipaddresspuppetserver = "192.168.99.101"
+$hostnamepuppetagent = "puppettestagent.loc"
+$ipaddresspuppetagent = "192.168.99.102"
 Vagrant.configure("2") do |config|
     config.vm.box = "centos/7"
     config.vm.define "puppetserver" do |puppetserver|
     puppetserver.vm.hostname = $hostnamepuppetserver
     puppetserver.vm.network "private_network", ip: $ipaddresspuppetserver
     puppetserver.vm.provider :virtualbox do |server|
-      server.name = "PuppetServer"
+      server.name = "puppettestserver"
       server.memory = 3096
       server.cpus = 2
     end
@@ -29,8 +31,8 @@ Vagrant.configure("2") do |config|
     SHELL
   end
   config.vm.define "puppetagent" do |puppetagent|
-    puppetagent.vm.hostname = "xpuakhaw0014t2"
-    puppetagent.vm.network "private_network", ip: "192.168.99.102"
+    puppetagent.vm.hostname = $hostnamepuppetagent
+    puppetagent.vm.network "private_network", ip: $ipaddresspuppetagent
     puppetagent.vm.provider :virtualbox do |agent|
       agent.name = "PuppetAgent1"
       agent.memory = 1024
