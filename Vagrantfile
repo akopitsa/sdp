@@ -14,7 +14,7 @@ Vagrant.configure("2") do |config|
     end
     puppetserver.vm.provision "shell", inline: <<-SHELL
       yum update
-      yum install -y ntp
+      yum install -y ntp mc
       timedatectl set-timezone Europe/Kiev
       ntpdate pool.ntp.org
       sed -i 's/server 0.centos.pool.ntp.org/server 0.ua.pool.ntp.org/g' /etc/ntp.conf
@@ -26,9 +26,20 @@ Vagrant.configure("2") do |config|
       rpm -ivh https://yum.puppetlabs.com/puppetlabs-release-pc1-el-7.noarch.rpm
       yum -y install puppetserver
 #      sed -i 's/-Xms2g -Xmx2g/-Xms3g -Xmx3g/g' /etc/sysconfig/puppetserver
-      systemctl start puppetserver
-      systemctl enable puppetserver
-    SHELL
+    echo "*.loc" >> /etc/puppetlabs/puppet/autosign.conf
+    echo """
+dns_alt_names = #{$hostnamepuppetserver},server
+autosign = /etc/puppetlabs/puppet/autosign.conf
+[main]
+certname = #{$hostnamepuppetserver}
+server = #{$hostnamepuppetserver}
+environment = production
+runinterval = 1m
+""" >> /etc/puppetlabs/puppet/puppet.conf
+systemctl start puppetserver
+systemctl enable puppetserver
+/opt/puppetlabs/bin/puppet module install puppetlabs-ntp --version 6.3.0
+SHELL
   end
   config.vm.define "puppetagent" do |puppetagent|
     puppetagent.vm.hostname = $hostnamepuppetagent
@@ -61,7 +72,7 @@ Vagrant.configure("2") do |config|
 certname = #{puppetagent.vm.hostname}
 server = #{$hostnamepuppetserver}
 environment = production
-runinterval = 1h
+runinterval = 1m
 """ >> /etc/puppetlabs/puppet/puppet.conf
       fi
       /opt/puppetlabs/bin/puppet resource service puppet ensure=running enable=true
